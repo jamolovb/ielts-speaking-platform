@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div id="welcome">
+        <h1>Ielts speaking test </h1>
+        <h4>Part 1: Introduction & Interview — answer a few questions about familiar topics</h4>
+        <button onclick="startTest()"> Start Test</button>
+    </div>
+
+
+    <div id="question" hidden>
+        <h3 id="questionText"></h3>
+        <div id="phaseRecord"> 
+            <button onclick="startRecording()"> ● Record </button>
+        </div>
+
+        <div id="phaseRecording" hidden>   
+            🔴 Recording...<button onclick="stopRecording()"> ■ Stop</button>
+
+        </div>
+
+        <div id="phaseDone" hidden>
+            ✓ Answer recorded <button onclick="nextQsBtn()">Next Question</button>
+
+        </div>
+
+        <div id="transcriptBox" hidden>
+            <h4>Transcript:</h4>
+             <p id="transcriptText"></p>
+        </div>        
+
+
+    </div>
+
+    <div id="processing" hidden>
+        <h2>Processing...</h2>
+
+    </div>
+
+
+    <div id="results" hidden>
+        <h2>Your Band Score: <span id="overallBand"></span></h2>
+
+        <h4>Fluency & Coherence — <span id="fcBand"></span></h4>
+        <p id="fcFeedback"></p>
+
+        <h4>Lexical Resource — <span id="lrBand"></span></h4>
+        <p id="lrFeedback"></p>
+
+        <h4>Grammatical Range & Accuracy — <span id="grBand"></span></h4>
+        <p id="grFeedback"></p>
+
+
+        <button onclick="tryAgain()">Try Again</button>
+    </div>
+
+    <script>
+
+        function startTest() {
+            document.getElementById('welcome').setAttribute('hidden',true)
+            document.getElementById('question').removeAttribute('hidden')
+            document.getElementById('questionText').textContent = qs[qCounter]
+
+        }
+
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream)
+            audioChunks = []; 
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.onstop = async () => {
+
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+            
+
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                const response=  await fetch('/upload-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result =  await response.json()
+                document.getElementById('transcriptText').textContent = result.transcript;
+                document.getElementById('transcriptBox').removeAttribute('hidden');
+
+                speakingSession.responses.push({
+                    question: qs[qCounter],
+                    transcript: result.transcript
+                });
+
+            };
+            mediaRecorder.start();
+            document.getElementById('phaseRecord').setAttribute('hidden',true)
+            document.getElementById('phaseRecording').removeAttribute('hidden')
+
+        }
+
+
+        function stopRecording() {
+        
+            mediaRecorder.stop();
+            document.getElementById('phaseRecording').setAttribute('hidden',true)
+            document.getElementById('phaseDone').removeAttribute('hidden')
+
+        }
+
+        async function  nextQsBtn() {
+            qCounter +=1
+            if(qCounter < qs.length){
+                document.getElementById('questionText').textContent = qs[qCounter]
+                document.getElementById('phaseDone').setAttribute('hidden',true)
+                document.getElementById('phaseRecord').removeAttribute('hidden')
+
+            }else{
+                document.getElementById('question').setAttribute('hidden',true)
+                document.getElementById('processing').removeAttribute('hidden')
+                const response = await fetch('/score' , {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(speakingSession)
+                    
+                 })
+                const scoreData = await response.json()
+                console.log(scoreData)
+                document.getElementById('overallBand').textContent = scoreData.overallBand
+
+                document.getElementById('fcBand').textContent = scoreData.fluencyCoherence.band
+                document.getElementById('fcFeedback').textContent = scoreData.fluencyCoherence.feedback
+
+                document.getElementById('lrBand').textContent = scoreData.lexicalResource.band
+                document.getElementById('lrFeedback').textContent = scoreData.lexicalResource.feedback
+
+
+                document.getElementById('grBand').textContent = scoreData.grammaticalRange.band
+                document.getElementById('grFeedback').textContent = scoreData.grammaticalRange.feedback
+
+
+
+
+                jumpToRes()
+
+
+            }
+
+
+
+        }
+
+        function jumpToRes() {
+            document.getElementById('processing').setAttribute('hidden',true)
+            document.getElementById('results').removeAttribute('hidden')
+
+        
+        }
+
+        const qs = [
+            "Do you work or are you a student?",
+            "What do you like most about your job or studies?",
+            "Do you live in a house or an apartment?",
+            //"What is your favorite room in your home?",
+            //"How do you usually spend your weekends?",
+            //"Do you prefer spending time indoors or outdoors?",
+            //"What kind of music do you enjoy listening to?",
+            //"Has your taste in music changed over the years?"
+        ];
+
+        let qCounter = 0
+        let mediaRecorder;
+        let audioChunks = [];
+
+
+        function tryAgain() {
+            document.getElementById('results').setAttribute('hidden',true)
+            document.getElementById('welcome').removeAttribute('hidden')
+
+            document.getElementById('phaseRecord').removeAttribute('hidden')
+            document.getElementById('phaseRecording').setAttribute('hidden',true)
+            document.getElementById('phaseDone').setAttribute('hidden',true)
+
+            qCounter = 0
+
+
+
+            
+        }
+
+        let speakingSession = {
+            sessionId: Date.now(),
+            responses: []
+        };
+
+
+    </script>
+</body>
+</html>

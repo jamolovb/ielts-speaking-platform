@@ -1,0 +1,65 @@
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f6f8;
+    color: #1f2933;
+    margin: 0;
+    padding: 40px 16px;
+    display: flex;
+    justify-content: center;
+    line-height: 1.6;
+}
+
+/* each screen div becomes a card */
+#welcome, #question, #processing, #results {
+    background: #ffffff;
+    max-width: 640px;
+    width: 100%;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    height: fit-content;
+}
+
+/* CRITICAL: keeps the hidden attribute working despite the styling above */
+[hidden] { display: none !important; }
+
+h1 { font-size: 1.6rem; margin-top: 0; }
+h2 { margin-top: 0; }
+h3 { font-size: 1.25rem; margin-top: 0; }
+
+button {
+    background: #b3282d;
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    margin-top: 12px;
+}
+button:hover { background: #911f24; }
+
+/* recording state */
+#phaseRecording {
+    color: #b3282d;
+    font-weight: 600;
+}
+
+/* transcript box */
+#transcriptBox {
+    background: #f0f2f5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 20px;
+}
+#transcriptBox h4 { margin: 0 0 6px; }
+#transcriptText { margin: 0; color: #52606d; }
+
+/* results */
+#results h4 { margin-bottom: 4px; color: #b3282d; }
+#results p { margin-top: 0; color: #52606d; }
+#overallBand { font-weight: 700; }
