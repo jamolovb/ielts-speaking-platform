@@ -1,6 +1,8 @@
 # IELTS speaking practice
 
-A practice app for turning a spoken answer into a transcript and requesting AI-generated feedback. The Express app serves the interface, a separate FastAPI service transcribes audio with faster-whisper, and the scoring route calls Gemini. Feedback is for practice and is not an official IELTS result.
+**Working prototype.** The app records a spoken response, returns a transcript, and produces a practice score. The recording-to-feedback experience is still being refined.
+
+The project is a practice app for turning a spoken answer into a transcript and requesting AI-generated feedback. The Express app serves the interface, a separate FastAPI service transcribes audio with faster-whisper, and the scoring route calls Gemini. Feedback is for practice and is not an official IELTS result.
 
 ## Run locally
 
